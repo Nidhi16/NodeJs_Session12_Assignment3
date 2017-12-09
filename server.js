@@ -3,23 +3,24 @@ var app      = express();
 var port     = process.env.PORT || 8080;
 var passport = require('passport');
 
-var bodyParser = require('body-parser');
 var session = require('express-session');
-app.use(session({secret: 'testing123'}));
+app.use(session({secret: 'testing123'}));  // session secret
 
-app.use(bodyParser.urlencoded({ extended:false }));
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session());  // persistent login sessions
 
-app.set('view engine', 'ejs');
+require('./config/passport')(passport);  // pass passport for configuration
 
-require('./config/passport')(passport);
+app.set('view engine', 'ejs');  // set up ejs for templating
 
+// route for home page
 app.get('/', function(request, response) {
    response.render('index.ejs');
 });
 
+// route for showing the profile page
 app.get('/profile', function(request, response) {
+    // get the user out of session and pass to template
     var id = request.session.id;
     var token = request.session.token;
     var displayName = request.session.displayName;
@@ -36,6 +37,7 @@ app.get('/auth/facebook/callback',
         failureRedirect : '/'
     }));
 
+// launch
 app.listen(port, function(){
     console.log("Listening to port " + port);
 });
